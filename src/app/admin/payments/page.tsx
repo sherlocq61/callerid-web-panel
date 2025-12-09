@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -167,6 +166,7 @@ export default function AdminPaymentsPage() {
                 expires_at: expiresAt.toISOString()
             })
 
+            // @ts-expect-error - Supabase types not up to date
             const { data: subData, error: subError } = await supabase
                 .from('subscriptions')
                 .upsert({
@@ -175,7 +175,7 @@ export default function AdminPaymentsPage() {
                     status: 'active',
                     max_devices: maxDevices,
                     expires_at: expiresAt.toISOString()
-                } as any, { // Type cast to fix build error
+                }, {
                     onConflict: 'user_id'
                 })
 
@@ -224,6 +224,7 @@ export default function AdminPaymentsPage() {
             const { data: { session } } = await supabase.auth.getSession()
             if (!session) return
 
+            // @ts-expect-error - Supabase types not up to date
             const { error } = await supabase
                 .from('payment_requests')
                 .update({
@@ -231,7 +232,7 @@ export default function AdminPaymentsPage() {
                     admin_notes: reason || 'Reddedildi',
                     approved_by: session.user.id,
                     approved_at: new Date().toISOString()
-                } as any) // Type cast to fix build error
+                })
                 .eq('id', paymentId)
 
             if (error) throw error
