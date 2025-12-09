@@ -60,7 +60,7 @@ export default function AdminAppSettingsPage() {
                         key,
                         value,
                         updated_at: new Date().toISOString()
-                    })
+                    } as any) // Type cast to fix build error
 
                 if (error) throw error
             }
