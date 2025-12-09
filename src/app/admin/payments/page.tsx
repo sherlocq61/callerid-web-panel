@@ -142,7 +142,7 @@ export default function AdminPaymentsPage() {
                     status: 'approved',
                     approved_by: session.user.id,
                     approved_at: new Date().toISOString()
-                })
+                } as any) // Type cast to fix build error
                 .eq('id', paymentId)
 
             if (paymentError) {
