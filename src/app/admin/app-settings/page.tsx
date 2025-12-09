@@ -1,4 +1,5 @@
 // @ts-nocheck
+// @ts-nocheck
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -55,7 +56,7 @@ export default function AdminAppSettingsPage() {
 
         try {
             for (const [key, value] of Object.entries(settings)) {
-                // @ts-expect-error - Supabase types not up to date
+                // @ts-ignore - Supabase types not up to date
                 const { error } = await supabase
                     .from('app_settings')
                     .upsert({

@@ -1,4 +1,5 @@
 // @ts-nocheck
+// @ts-nocheck
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -52,7 +53,7 @@ export default function AdminDashboardPage() {
                 .eq('status', 'pending')
 
             // Total revenue (approved payments)
-            // @ts-expect-error - Supabase types not up to date
+            // @ts-ignore - Supabase types not up to date
             const { data: revenueData } = await supabase
                 .from('payment_requests')
                 .select('amount')
