@@ -1,6 +1,9 @@
 // @ts-nocheck
 'use client'
 
+// Force dynamic rendering (required for cookies/auth)
+export const dynamic = 'force-dynamic'
+
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase/client'
