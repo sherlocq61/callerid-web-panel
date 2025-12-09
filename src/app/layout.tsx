@@ -6,6 +6,11 @@ import InstallPWA from '@/components/pwa/InstallPWA'
 import Script from 'next/script'
 import { getSEOSettings, generateMetadata as generateSEOMetadata } from '@/lib/seo/metadata'
 
+// Force dynamic rendering for entire app (required for auth/cookies)
+export const dynamic = 'force-dynamic'
+export const dynamicParams = true
+export const revalidate = 0
+
 const inter = Inter({ subsets: ['latin'] })
 
 export async function generateMetadata(): Promise<Metadata> {
