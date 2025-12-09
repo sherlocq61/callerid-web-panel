@@ -66,16 +66,25 @@ export default function AdminSettingsPage() {
 
             if (error) throw error
 
-            const settingsObj: any = {}
+            const settingsObj: any = {
+                pricing: {
+                    lite: { monthly: 99, yearly: 990, yearlyOriginal: 1188, discount: 17 },
+                    pro: { monthly: 249, yearly: 2490, yearlyOriginal: 2988, discount: 17 }
+                }
+            }
+
             data?.forEach((item) => {
                 try {
-                    settingsObj[item.key] = typeof item.value === 'string' ? JSON.parse(item.value) : item.value
+                    // Parse JSON values
+                    const parsedValue = typeof item.value === 'string' ? JSON.parse(item.value) : item.value
+                    settingsObj[item.key] = parsedValue
                 } catch (e) {
+                    // If parsing fails, use raw value
                     settingsObj[item.key] = item.value
                 }
             })
 
-            setSettings(settingsObj)
+            setSettings(prev => ({ ...prev, ...settingsObj }))
             setLoading(false)
         } catch (error) {
             console.error('Error loading settings:', error)
