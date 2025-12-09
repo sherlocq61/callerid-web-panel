@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    output: 'standalone', // For Vercel server-side rendering
     typescript: {
         // Ignore TypeScript errors during build (Supabase types not up to date)
         ignoreBuildErrors: true,
