@@ -146,6 +146,27 @@ export default function DeviceManagementPanel() {
         }
     }
 
+    const removeDevice = async (deviceId: string, deviceName: string) => {
+        if (!confirm(`"${deviceName}" cihazını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) {
+            return
+        }
+
+        try {
+            const { error } = await supabase
+                .from('devices')
+                .delete()
+                .eq('device_id', deviceId)
+
+            if (error) throw error
+
+            // Reload devices
+            await loadDevices()
+        } catch (error) {
+            console.error('Error removing device:', error)
+            alert('Cihaz silinirken bir hata oluştu')
+        }
+    }
+
     const assignDevice = async (deviceId: string, userId: string) => {
         try {
             const { error } = await supabase
@@ -265,6 +286,17 @@ export default function DeviceManagementPanel() {
                                             <span className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm">
                                                 {device.assigned_user_name || 'Siz'}
                                             </span>
+                                        )}
+
+                                        {/* Remove Device Button */}
+                                        {!device.is_online && (
+                                            <button
+                                                onClick={() => removeDevice(device.device_id, device.device_name)}
+                                                className="px-3 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors"
+                                                title="Cihazı Sil"
+                                            >
+                                                🗑️
+                                            </button>
                                         )}
                                     </div>
                                 </div>

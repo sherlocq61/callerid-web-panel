@@ -71,6 +71,7 @@ function PaymentContent() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    userId: userId,
                     email: userEmail,
                     name: userName,
                     plan: plan,

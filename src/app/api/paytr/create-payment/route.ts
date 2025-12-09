@@ -4,15 +4,15 @@ import crypto from 'crypto'
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
-        const { email, name, plan, price, maxDevices } = body
+        const { email, name, plan, price, maxDevices, userId } = body
 
         // PayTR credentials (environment variables'dan alınacak)
         const merchant_id = process.env.PAYTR_MERCHANT_ID || 'YOUR_MERCHANT_ID'
         const merchant_key = process.env.PAYTR_MERCHANT_KEY || 'YOUR_MERCHANT_KEY'
         const merchant_salt = process.env.PAYTR_MERCHANT_SALT || 'YOUR_MERCHANT_SALT'
 
-        // Sipariş bilgileri
-        const merchant_oid = `SUB-${Date.now()}` // Benzersiz sipariş numarası
+        // Sipariş bilgileri - Format: userId-plan-timestamp
+        const merchant_oid = `${userId}-${plan}-${Date.now()}`
         const user_basket = JSON.stringify([
             [`${plan.charAt(0).toUpperCase() + plan.slice(1)} Paket`, price, 1]
         ])

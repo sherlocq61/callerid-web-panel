@@ -36,27 +36,44 @@ export async function POST(request: NextRequest) {
 
         // Ödeme başarılı ise
         if (status === 'success') {
-            // merchant_oid'den plan bilgisini çıkar (SUB-timestamp formatında)
-            // Gerçek uygulamada merchant_oid ile ilişkili sipariş bilgisini veritabanından çekmelisiniz
-
-            // Örnek: Subscription oluştur/güncelle
-            // Bu kısmı kendi iş mantığınıza göre düzenleyin
-
             console.log('Payment successful:', {
                 merchant_oid,
                 total_amount,
                 status
             })
 
-            // TODO: Subscription güncelleme
-            // const { error } = await supabase
-            //   .from('subscriptions')
-            //   .update({
-            //     status: 'active',
-            //     expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-            //   })
-            //   .eq('user_id', userId)
+            // merchant_oid'den user_id ve plan bilgisini çıkar
+            // Format: userId-plan-timestamp
+            const parts = merchant_oid.split('-')
+            if (parts.length >= 2) {
+                const userId = parts[0]
+                const plan = parts[1]
 
+                // Subscription'ı güncelle veya oluştur
+                const expiresAt = new Date()
+                expiresAt.setMonth(expiresAt.getMonth() + 1) // 1 ay ekle
+
+                const maxDevices = plan === 'lite' ? 1 : plan === 'pro' ? 5 : 999
+
+                const { error: subError } = await supabase
+                    .from('subscriptions')
+                    .upsert({
+                        user_id: userId,
+                        plan: plan,
+                        status: 'active',
+                        max_devices: maxDevices,
+                        started_at: new Date().toISOString(),
+                        expires_at: expiresAt.toISOString()
+                    }, {
+                        onConflict: 'user_id'
+                    })
+
+                if (subError) {
+                    console.error('Subscription update error:', subError)
+                } else {
+                    console.log('Subscription updated successfully for user:', userId)
+                }
+            }
         } else {
             console.error('Payment failed:', {
                 merchant_oid,
