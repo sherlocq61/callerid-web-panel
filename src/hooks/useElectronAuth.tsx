@@ -40,14 +40,11 @@ export function useElectronAuth() {
 
     const restoreSession = async () => {
         try {
-            console.log('Restoring session from Electron storage...')
             const savedSession = await window.electron!.auth.getSession()
 
             if (savedSession) {
-                console.log('Found saved session, restoring to Supabase...')
-
-                    // Mark restore time to prevent duplicate saves
-                    (window as any).__lastRestoreTime = Date.now()
+                // Mark restore time to prevent duplicate saves
+                (window as any).__lastRestoreTime = Date.now()
 
                 // Set session state immediately
                 setSession(savedSession)
@@ -59,18 +56,14 @@ export function useElectronAuth() {
                 })
 
                 if (error) {
-                    console.error('Error restoring session:', error)
                     await window.electron!.auth.clearSession()
                     setSession(null)
                 } else {
-                    // Session restored successfully
                     setSession(data.session)
                 }
-            } else {
-                console.log('No saved session found')
             }
         } catch (error) {
-            console.error('Error in restoreSession:', error)
+            // Silent error handling
         } finally {
             setLoading(false)
         }
@@ -79,25 +72,23 @@ export function useElectronAuth() {
     const saveSession = async (session: Session) => {
         if (!isElectron) return
         try {
-            console.log('Saving session to Electron storage...')
             await window.electron!.auth.saveSession({
                 access_token: session.access_token,
                 refresh_token: session.refresh_token,
                 expires_at: session.expires_at || 0
             })
         } catch (error) {
-            console.error('Error saving session:', error)
+            // Silent error handling
         }
     }
 
     const clearSession = async () => {
         if (!isElectron) return
         try {
-            console.log('Clearing session from Electron storage...')
             await window.electron!.auth.clearSession()
             setSession(null)
         } catch (error) {
-            console.error('Error clearing session:', error)
+            // Silent error handling
         }
     }
 
@@ -106,21 +97,17 @@ export function useElectronAuth() {
         if (!isElectron) return
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-            console.log('Auth state changed:', event)
-
             // Only save session on actual sign in, not during restore
             if (event === 'SIGNED_IN' && currentSession && !loading) {
                 // Check if this is a real login (not a restore)
                 // If we just restored a session, don't save it again
                 const timeSinceRestore = Date.now() - (window as any).__lastRestoreTime || Infinity
                 if (timeSinceRestore > 5000) { // Only save if more than 5 seconds since restore
-                    console.log('Saving session to Electron storage...')
                     await saveSession(currentSession)
                 }
             } else if (event === 'SIGNED_OUT') {
                 await clearSession()
             } else if (event === 'TOKEN_REFRESHED' && currentSession) {
-                console.log('Token refreshed, updating session...')
                 await saveSession(currentSession)
             }
         })
