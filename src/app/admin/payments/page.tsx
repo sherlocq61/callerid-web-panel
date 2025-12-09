@@ -51,7 +51,7 @@ export default function AdminPaymentsPage() {
             .from('users')
             .select('role')
             .eq('id', session.user.id)
-            .single()
+            .single() as any // Type cast to fix build error
 
         if (error || !userData || (userData.role !== 'admin' && userData.role !== 'super_admin')) {
             showToast('Bu sayfaya erişim yetkiniz yok!', 'error')
