@@ -20,7 +20,7 @@ interface PaymentRequest {
     payment_date: string
     status: string
     created_at: string
-    users: {
+    users?: {
         email: string
         full_name: string
     }
@@ -67,13 +67,7 @@ export default function AdminPaymentsPage() {
         try {
             let query = supabase
                 .from('payment_requests')
-                .select(`
-          *,
-          users!payment_requests_user_id_fkey (
-            email,
-            full_name
-          )
-        `)
+                .select('*')
                 .order('created_at', { ascending: false })
 
             if (filter !== 'all') {
