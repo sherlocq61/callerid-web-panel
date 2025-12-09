@@ -38,11 +38,11 @@ const STEPS: OnboardingStep[] = [
     },
     {
         id: 2,
-        title: 'APK İndir 📱',
-        description: 'Android uygulamasını indirmek için aşağıdaki butona tıklayın veya QR kodu telefonunuzla tarayın.',
+        title: 'Uygulama İndir 📱',
+        description: 'Android veya Windows uygulamasını indirmek için aşağıdaki butonlardan birine tıklayın.',
         icon: Download,
         action: 'download',
-        actionLabel: 'APK İndir'
+        actionLabel: 'İndirdim'
     },
     {
         id: 3,
@@ -314,12 +314,26 @@ export default function OnboardingWizard() {
                         {/* Step-specific content */}
                         {currentStep === 2 && (
                             <div className="mb-8 flex flex-col items-center gap-4">
-                                <div className="w-48 h-48 bg-gray-100 rounded-xl flex items-center justify-center">
-                                    <QrCode className="w-32 h-32 text-gray-400" />
-                                    <div className="absolute text-xs text-gray-500">QR Kod</div>
+                                <div className="w-full max-w-md space-y-3">
+                                    <a
+                                        href="/downloads/CallerID-Android.apk"
+                                        download
+                                        className="flex items-center justify-center gap-3 w-full px-6 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition-all"
+                                    >
+                                        <Smartphone className="w-5 h-5" />
+                                        Android APK İndir
+                                    </a>
+                                    <a
+                                        href="/downloads/CallerID-Windows.zip"
+                                        download
+                                        className="flex items-center justify-center gap-3 w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all"
+                                    >
+                                        <Download className="w-5 h-5" />
+                                        Windows Uygulaması İndir
+                                    </a>
                                 </div>
-                                <p className="text-sm text-gray-500">
-                                    Telefonunuzla QR kodu tarayın veya butona tıklayın
+                                <p className="text-sm text-gray-500 text-center">
+                                    Platformunuza uygun uygulamayı indirin
                                 </p>
                             </div>
                         )}
