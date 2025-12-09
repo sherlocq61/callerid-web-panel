@@ -195,6 +195,18 @@ export default function LandingPage() {
                         </div>
                         <div className="flex items-center gap-4">
                             <Link
+                                href="/downloads"
+                                className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                            >
+                                İndirmeler
+                            </Link>
+                            <Link
+                                href="/status"
+                                className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                            >
+                                Durum
+                            </Link>
+                            <Link
                                 href="/login"
                                 className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
                             >
