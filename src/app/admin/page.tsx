@@ -52,10 +52,11 @@ export default function AdminDashboardPage() {
                 .eq('status', 'pending')
 
             // Total revenue (approved payments)
+            // @ts-expect-error - Supabase types not up to date
             const { data: revenueData } = await supabase
                 .from('payment_requests')
                 .select('amount')
-                .eq('status', 'approved') as any // Type cast to fix build error
+                .eq('status', 'approved')
 
             const totalRevenue = revenueData?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0
 

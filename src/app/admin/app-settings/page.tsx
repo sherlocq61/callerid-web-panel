@@ -55,13 +55,14 @@ export default function AdminAppSettingsPage() {
 
         try {
             for (const [key, value] of Object.entries(settings)) {
+                // @ts-expect-error - Supabase types not up to date
                 const { error } = await supabase
                     .from('app_settings')
                     .upsert({
                         key,
                         value,
                         updated_at: new Date().toISOString()
-                    } as any) // Type cast to fix build error
+                    })
 
                 if (error) throw error
             }

@@ -47,11 +47,12 @@ export default function AdminPaymentsPage() {
         }
 
         // Check if user has admin or super_admin role
+        // @ts-expect-error - Supabase types not up to date
         const { data: userData, error } = await supabase
             .from('users')
             .select('role')
             .eq('id', session.user.id)
-            .single() as any // Type cast to fix build error
+            .single()
 
         if (error || !userData || (userData.role !== 'admin' && userData.role !== 'super_admin')) {
             showToast('Bu sayfaya erişim yetkiniz yok!', 'error')
