@@ -31,9 +31,26 @@ export default function DeviceManagementPanel() {
 
     useEffect(() => {
         loadData()
+
+        // Auto-refresh every 30 seconds to update device status
+        const interval = setInterval(() => {
+            updateDeviceStatus()
+            loadDevices()
+        }, 30000)
+
+        return () => clearInterval(interval)
     }, [])
 
+    const updateDeviceStatus = async () => {
+        try {
+            await fetch('/api/devices/update-status', { method: 'POST' })
+        } catch (error) {
+            console.error('Error updating device status:', error)
+        }
+    }
+
     const loadData = async () => {
+        await updateDeviceStatus() // Update status before loading
         await Promise.all([loadDevices(), loadMembers()])
     }
 
