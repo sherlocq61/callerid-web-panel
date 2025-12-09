@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: 'standalone', // For Vercel server-side rendering
+    // Only use standalone for Vercel, not for Electron
+    output: process.env.ELECTRON_BUILD ? undefined : 'standalone',
     typescript: {
         // Ignore TypeScript errors during build (Supabase types not up to date)
         ignoreBuildErrors: true,

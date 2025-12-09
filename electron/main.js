@@ -4,6 +4,9 @@ const { spawn } = require('child_process')
 const fs = require('fs')
 const AuthStorage = require('./storage')
 
+// Set app name for consistent userData path
+app.setName('CallerID')
+
 const authStorage = new AuthStorage()
 
 // Simple file-based storage
@@ -98,11 +101,17 @@ function createWindow() {
             })
         }, 5000)
     } else {
-        // Production mode - NO DevTools
+        // Production mode - Start Next.js server and use localhost
+        console.log('Production: Starting Next.js server...')
         startNextServer().then(() => {
             setTimeout(() => {
-                mainWindow.loadURL('http://localhost:3000/login')
-            }, 2000)
+                console.log('Loading from localhost:3000')
+                mainWindow.loadURL('http://localhost:3000/login').then(() => {
+                    console.log('Successfully loaded from localhost!')
+                }).catch(err => {
+                    console.error('Failed to load from localhost:', err)
+                })
+            }, 3000)
         })
     }
 
@@ -203,19 +212,6 @@ ipcMain.on('storage-remove', (event, key) => {
     setStore(store)
 })
 
-// Auth session handlers
-ipcMain.handle('auth-save-session', async (event, session) => {
-    return authStorage.saveSession(session)
-})
-
-ipcMain.handle('auth-get-session', async () => {
-    return authStorage.getSession()
-})
-
-ipcMain.handle('auth-clear-session', async () => {
-    return authStorage.clearSession()
-})
-
 // App lifecycle
 app.whenReady().then(() => {
     createWindow()
@@ -228,8 +224,46 @@ app.whenReady().then(() => {
     })
 })
 
+// Auth session handlers
+ipcMain.handle('auth-save-session', async (event, session) => {
+    console.log('Saving session to Electron storage...')
+    return authStorage.saveSession(session)
+})
+
+ipcMain.handle('auth-get-session', async () => {
+    console.log('Getting session from Electron storage...')
+    return authStorage.getSession()
+})
+
+ipcMain.handle('auth-clear-session', async () => {
+    console.log('Clearing session from Electron storage...')
+    return authStorage.clearSession()
+})
+
+// Window controls
+ipcMain.on('window-minimize', () => {
+    if (mainWindow) mainWindow.minimize()
+})
+
+ipcMain.on('window-maximize', () => {
+    if (mainWindow) {
+        if (mainWindow.isMaximized()) {
+            mainWindow.unmaximize()
+        } else {
+            mainWindow.maximize()
+        }
+    }
+})
+
+ipcMain.on('window-close', () => {
+    if (mainWindow) mainWindow.close()
+})
+
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
+        if (nextProcess) {
+            nextProcess.kill()
+        }
         app.quit()
     }
 })

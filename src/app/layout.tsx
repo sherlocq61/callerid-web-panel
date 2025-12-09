@@ -4,7 +4,6 @@ import { Inter } from 'next/font/google'
 import { NotificationProvider } from '@/components/notifications/NotificationProvider'
 import InstallPWA from '@/components/pwa/InstallPWA'
 import Script from 'next/script'
-import { getSEOSettings, generateMetadata as generateSEOMetadata } from '@/lib/seo/metadata'
 
 // Force dynamic rendering for entire app (required for auth/cookies)
 export const dynamic = 'force-dynamic'
@@ -13,38 +12,28 @@ export const revalidate = 0
 
 const inter = Inter({ subsets: ['latin'] })
 
-export async function generateMetadata(): Promise<Metadata> {
-    const seoSettings = await getSEOSettings('landing')
-
-    if (!seoSettings) {
-        return {
-            title: 'Çağrı Yönetimi',
-            description: 'Profesyonel çağrı yönetim sistemi'
-        }
-    }
-
-    return {
-        ...generateSEOMetadata(seoSettings),
-        manifest: '/manifest.json',
-        themeColor: '#3b82f6',
-        appleWebApp: {
-            capable: true,
-            statusBarStyle: 'default',
-            title: 'Çağrı Yönetim'
-        },
-        icons: {
-            icon: '/icon-192.png',
-            apple: '/icon-192.png'
-        }
+// Static metadata (no async calls)
+export const metadata: Metadata = {
+    title: 'Çağrı Yönetimi',
+    description: 'Profesyonel çağrı yönetim sistemi',
+    manifest: '/manifest.json',
+    themeColor: '#3b82f6',
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: 'default',
+        title: 'Çağrı Yönetim'
+    },
+    icons: {
+        icon: '/icon-192.png',
+        apple: '/icon-192.png'
     }
 }
 
-export default async function RootLayout({
+export default function RootLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
-    const seoSettings = await getSEOSettings('landing')
 
     return (
         <html lang="tr">
@@ -55,17 +44,6 @@ export default async function RootLayout({
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
                 <meta name="apple-mobile-web-app-title" content="Çağrı Yönetim" />
                 <link rel="apple-touch-icon" href="/icon-192.png" />
-
-                {/* Structured Data (Schema.org) */}
-                {seoSettings?.structured_data && (
-                    <Script
-                        id="structured-data"
-                        type="application/ld+json"
-                        dangerouslySetInnerHTML={{
-                            __html: JSON.stringify(seoSettings.structured_data)
-                        }}
-                    />
-                )}
             </head>
             <body className={inter.className}>
                 <NotificationProvider>

@@ -63,7 +63,7 @@ export function useElectronAuth() {
                     await window.electron!.auth.clearSession()
                     setSession(null)
                 } else {
-                    console.log('Session restored successfully!')
+                    // Session restored successfully
                     setSession(data.session)
                 }
             } else {
