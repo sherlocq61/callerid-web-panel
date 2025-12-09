@@ -173,7 +173,7 @@ export default function AdminPaymentsPage() {
                     status: 'active',
                     max_devices: maxDevices,
                     expires_at: expiresAt.toISOString()
-                }, {
+                } as any, { // Type cast to fix build error
                     onConflict: 'user_id'
                 })
 
@@ -229,7 +229,7 @@ export default function AdminPaymentsPage() {
                     admin_notes: reason || 'Reddedildi',
                     approved_by: session.user.id,
                     approved_at: new Date().toISOString()
-                })
+                } as any) // Type cast to fix build error
                 .eq('id', paymentId)
 
             if (error) throw error
