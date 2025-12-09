@@ -54,9 +54,9 @@ export default function AdminDashboardPage() {
             const { data: revenueData } = await supabase
                 .from('payment_requests')
                 .select('amount')
-                .eq('status', 'approved')
+                .eq('status', 'approved') as any // Type cast to fix build error
 
-            const totalRevenue = revenueData?.reduce((sum, item) => sum + item.amount, 0) || 0
+            const totalRevenue = revenueData?.reduce((sum: number, item: any) => sum + item.amount, 0) || 0
 
             // New users today
             const today = new Date()
