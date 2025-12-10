@@ -271,16 +271,16 @@ export default function ContactsPanel() {
             const { data: { session } } = await supabase.auth.getSession()
             if (!session) return
 
-            // Get active devices
+            // Get active devices (removed is_online check - allow offline devices)
             const { data: devices } = await supabase
                 .from('devices')
                 .select('*')
                 .eq('user_id', session.user.id)
-                .eq('is_online', true)
+                .eq('is_active', true)
                 .eq('platform', 'android')
 
             if (!devices || devices.length === 0) {
-                showToast('Aktif Android cihaz bulunamadı', 'error')
+                showToast('Aktif Android cihaz bulunamadı. Lütfen Android uygulamasından giriş yapın.', 'error')
                 return
             }
 

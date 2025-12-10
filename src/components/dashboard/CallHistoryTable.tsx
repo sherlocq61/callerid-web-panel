@@ -335,15 +335,14 @@ export default function CallHistoryTable() {
 
                                             {/* Last Destination */}
                                             <td className="px-6 py-4">
-                                                {call.last_destination ? (
-                                                    <span className="text-sm text-gray-700">{call.last_destination}</span>
-                                                ) : (
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Güzergah girin..."
-                                                        className="text-sm px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                        onBlur={(e) => {
-                                                            const destination = e.target.value.trim()
+                                                <input
+                                                    type="text"
+                                                    placeholder="Güzergah girin..."
+                                                    defaultValue={call.last_destination || ''}
+                                                    className="text-sm px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            const destination = e.currentTarget.value.trim()
                                                             if (destination) {
                                                                 // Save destination to database
                                                                 supabase
@@ -353,11 +352,26 @@ export default function CallHistoryTable() {
                                                                     .then(() => {
                                                                         loadCalls()
                                                                         toast.success('Güzergah kaydedildi')
+                                                                        e.currentTarget.blur()
                                                                     })
                                                             }
-                                                        }}
-                                                    />
-                                                )}
+                                                        }
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        const destination = e.target.value.trim()
+                                                        if (destination && destination !== call.last_destination) {
+                                                            // Save destination to database
+                                                            supabase
+                                                                .from('calls')
+                                                                .update({ last_destination: destination })
+                                                                .eq('id', call.id)
+                                                                .then(() => {
+                                                                    loadCalls()
+                                                                    toast.success('Güzergah kaydedildi')
+                                                                })
+                                                        }
+                                                    }}
+                                                />
                                             </td>
 
                                             {/* Status */}

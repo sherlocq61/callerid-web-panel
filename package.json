@@ -28,7 +28,15 @@
             "package.json"
         ],
         "win": {
-            "target": "dir"
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ],
+            "compression": "store"
         }
     },
     "dependencies": {

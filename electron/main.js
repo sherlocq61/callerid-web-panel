@@ -95,7 +95,7 @@ function createWindow() {
             console.log('Development: Loading http://localhost:3000/login')
             mainWindow.loadURL('http://localhost:3000/login').then(() => {
                 console.log('Successfully loaded!')
-                mainWindow.webContents.openDevTools()
+                // mainWindow.webContents.openDevTools() // DevTools disabled
             }).catch(err => {
                 console.error('Failed to load URL:', err)
             })
