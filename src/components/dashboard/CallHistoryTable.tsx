@@ -125,16 +125,24 @@ export default function CallHistoryTable() {
 
     const loadCalls = async () => {
         try {
+            // First get calls
             const { data: callsData, error: callsError } = await supabase
                 .from('calls')
-                .select(`
-                    *,
-                    contact:contacts!left(name)
-                `)
+                .select('*')
                 .order('timestamp', { ascending: false })
                 .limit(50)
 
             if (callsError) throw callsError
+
+            // Then get contacts to match
+            const { data: contactsData } = await supabase
+                .from('contacts')
+                .select('phone_number, name')
+
+            // Create contact map
+            const contactMap = new Map(
+                contactsData?.map(c => [c.phone_number, c.name]) || []
+            )
 
             // Check blacklist for each number
             const { data: blacklistData } = await supabase
@@ -161,7 +169,7 @@ export default function CallHistoryTable() {
 
                 return {
                     ...call,
-                    contact_name: call.contact?.name || null,
+                    contact_name: contactMap.get(call.phone_number) || null,
                     last_destination: lastDestination,
                     is_blacklisted: blacklistMap.has(call.phone_number),
                     blacklist_reason: blacklistMap.get(call.phone_number)
