@@ -351,6 +351,7 @@ export default function CallHistoryTable() {
                                             {/* Last Destination */}
                                             <td className="px-6 py-4">
                                                 <input
+                                                    key={`dest-${call.id}-${call.last_destination || 'empty'}`}
                                                     type="text"
                                                     placeholder="Güzergah girin..."
                                                     defaultValue={call.last_destination || ''}
