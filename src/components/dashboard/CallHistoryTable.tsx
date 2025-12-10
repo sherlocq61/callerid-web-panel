@@ -36,6 +36,13 @@ export default function CallHistoryTable() {
     const supabase = createBrowserClient()
 
     useEffect(() => {
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                console.log('Notification permission:', permission)
+            })
+        }
+
         loadCalls()
 
         // Real-time subscription
