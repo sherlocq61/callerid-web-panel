@@ -205,7 +205,7 @@ export default function CallHistoryTable() {
     }
 
     const formatTime = (dateString: string) => {
-        // Database stores UTC, convert to Istanbul time
+        // Android sends UTC, convert to Istanbul time
         const date = new Date(dateString)
         return date.toLocaleTimeString('tr-TR', {
             hour: '2-digit',
@@ -387,16 +387,38 @@ export default function CallHistoryTable() {
 
                                             {/* Last Destination */}
                                             <td className="px-6 py-4">
-                                                <input
-                                                    key={`dest-${call.id}-${call.last_destination || 'empty'}`}
-                                                    type="text"
-                                                    placeholder="Güzergah girin..."
-                                                    defaultValue={call.last_destination || ''}
-                                                    className="text-sm px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            const destination = e.currentTarget.value.trim()
-                                                            if (destination) {
+                                                <div className="flex items-start gap-2">
+                                                    <textarea
+                                                        key={`dest-${call.id}-${call.last_destination || 'empty'}`}
+                                                        placeholder="Güzergah girin..."
+                                                        defaultValue={call.last_destination || ''}
+                                                        rows={2}
+                                                        className="text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full resize-y min-h-[60px]"
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                                e.preventDefault()
+                                                                const destination = e.currentTarget.value.trim()
+                                                                if (destination) {
+                                                                    // Save destination to database
+                                                                    supabase
+                                                                        .from('calls')
+                                                                        .update({ last_destination: destination })
+                                                                        .eq('id', call.id)
+                                                                        .then(({ error }) => {
+                                                                            if (error) {
+                                                                                console.error('Destination save error:', error)
+                                                                                toast.error('Güzergah kaydedilemedi: ' + error.message)
+                                                                            } else {
+                                                                                toast.success('Güzergah kaydedildi')
+                                                                                loadCalls()
+                                                                            }
+                                                                        })
+                                                                }
+                                                            }
+                                                        }}
+                                                        onBlur={(e) => {
+                                                            const destination = e.target.value.trim()
+                                                            if (destination && destination !== call.last_destination) {
                                                                 // Save destination to database
                                                                 supabase
                                                                     .from('calls')
@@ -412,28 +434,23 @@ export default function CallHistoryTable() {
                                                                         }
                                                                     })
                                                             }
-                                                        }
-                                                    }}
-                                                    onBlur={(e) => {
-                                                        const destination = e.target.value.trim()
-                                                        if (destination && destination !== call.last_destination) {
-                                                            // Save destination to database
-                                                            supabase
-                                                                .from('calls')
-                                                                .update({ last_destination: destination })
-                                                                .eq('id', call.id)
-                                                                .then(({ error }) => {
-                                                                    if (error) {
-                                                                        console.error('Destination save error:', error)
-                                                                        toast.error('Güzergah kaydedilemedi: ' + error.message)
-                                                                    } else {
-                                                                        toast.success('Güzergah kaydedildi')
-                                                                        loadCalls()
-                                                                    }
-                                                                })
-                                                        }
-                                                    }}
-                                                />
+                                                        }}
+                                                    />
+                                                    {call.last_destination && (
+                                                        <button
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(call.last_destination || '')
+                                                                toast.success('Güzergah kopyalandı')
+                                                            }}
+                                                            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0"
+                                                            title="Kopyala"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </td>
 
                                             {/* Status */}
