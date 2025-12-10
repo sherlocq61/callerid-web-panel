@@ -183,10 +183,11 @@ export default function CallHistoryTable() {
     const formatTime = (dateString: string) => {
         // Parse UTC time and convert to Istanbul timezone (GMT+3)
         const date = new Date(dateString)
-        return date.toLocaleTimeString('tr-TR', {
+        // Add 3 hours for Istanbul timezone
+        const istanbulTime = new Date(date.getTime() + (3 * 60 * 60 * 1000))
+        return istanbulTime.toLocaleTimeString('tr-TR', {
             hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'Europe/Istanbul'
+            minute: '2-digit'
         })
     }
 
@@ -366,9 +367,8 @@ export default function CallHistoryTable() {
                                                                     .update({ last_destination: destination })
                                                                     .eq('id', call.id)
                                                                     .then(() => {
-                                                                        loadCalls()
                                                                         toast.success('Güzergah kaydedildi')
-                                                                        e.currentTarget.blur()
+                                                                        loadCalls()
                                                                     })
                                                             }
                                                         }
