@@ -315,7 +315,7 @@ export default function CallHistoryTable() {
                                             </td>
 
                                             {/* Contact / Number */}
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-4" style={{ minWidth: '200px' }}>
                                                 <div className="flex flex-col">
                                                     {call.contact_name ? (
                                                         <>
@@ -325,13 +325,13 @@ export default function CallHistoryTable() {
                                                                     {call.contact_name}
                                                                 </span>
                                                             </div>
-                                                            <span className="text-sm text-gray-600 font-mono ml-6">
+                                                            <span className="text-sm text-gray-600 font-mono ml-6 whitespace-nowrap">
                                                                 {formatPhoneNumber(call.phone_number)}
                                                             </span>
                                                         </>
                                                     ) : (
                                                         <div className="flex items-center gap-2">
-                                                            <span className="font-mono font-semibold text-gray-900">
+                                                            <span className="font-mono font-semibold text-gray-900 whitespace-nowrap">
                                                                 {formatPhoneNumber(call.phone_number)}
                                                             </span>
                                                             <button
@@ -340,7 +340,7 @@ export default function CallHistoryTable() {
                                                                     phoneNumber: call.phone_number,
                                                                     defaultName: call.last_destination || ''
                                                                 })}
-                                                                className="p-1 hover:bg-blue-50 rounded-full transition-colors"
+                                                                className="p-1 hover:bg-blue-50 rounded-full transition-colors flex-shrink-0"
                                                                 title="Rehbere Kaydet"
                                                             >
                                                                 <UserPlus className="w-4 h-4 text-blue-600" />
