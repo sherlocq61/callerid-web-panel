@@ -544,13 +544,16 @@ export default function CallHistoryTable() {
                                 return
                             }
 
+                            // Use UPSERT to handle duplicates (phone normalization may create duplicates)
                             supabase
                                 .from('contacts')
-                                .insert({
+                                .upsert({
                                     user_id: session.user.id,
                                     phone_number: saveContactModal.phoneNumber,
                                     name: name.trim(),
                                     notes: notes.trim() || null
+                                }, {
+                                    onConflict: 'user_id,phone_number'
                                 })
                                 .then(({ error }) => {
                                     if (error) {
