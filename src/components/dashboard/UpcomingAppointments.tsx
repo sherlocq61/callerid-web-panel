@@ -29,10 +29,8 @@ export default function UpcomingAppointments() {
             const { data: { user } } = await supabase.auth.getUser()
             if (!user) return
 
-            // Get current time in UTC (appointments are stored in UTC+3 but we need to compare in UTC)
-            const now = new Date()
-            const utcNow = new Date(now.getTime() - (3 * 60 * 60 * 1000)) // Subtract 3 hours to get UTC
-            const nowISO = utcNow.toISOString()
+            // Appointments are stored in UTC, compare directly
+            const nowISO = new Date().toISOString()
 
             const { data, error } = await supabase
                 .from('appointments')
