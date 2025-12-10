@@ -33,6 +33,7 @@ export default function CallHistoryTable() {
         phoneNumber: string
         defaultName: string
     }>({ isOpen: false, phoneNumber: '', defaultName: '' })
+    const [companyName, setCompanyName] = useState('')
     const supabase = createBrowserClient()
 
     useEffect(() => {
@@ -125,6 +126,20 @@ export default function CallHistoryTable() {
 
     const loadCalls = async () => {
         try {
+            // Get current user and company name
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session) {
+                const { data: userData } = await supabase
+                    .from('users')
+                    .select('company_name')
+                    .eq('id', session.user.id)
+                    .single()
+
+                if (userData?.company_name) {
+                    setCompanyName(userData.company_name)
+                }
+            }
+
             // First get calls
             const { data: callsData, error: callsError } = await supabase
                 .from('calls')
@@ -439,9 +454,16 @@ export default function CallHistoryTable() {
                                                     {call.last_destination && (
                                                         <button
                                                             onClick={() => {
-                                                                const textToCopy = `${call.last_destination}\n${formatPhoneNumber(call.phone_number)}`
+                                                                const parts = [
+                                                                    call.last_destination,
+                                                                    formatPhoneNumber(call.phone_number)
+                                                                ]
+                                                                if (companyName) {
+                                                                    parts.push(companyName)
+                                                                }
+                                                                const textToCopy = parts.join('\n')
                                                                 navigator.clipboard.writeText(textToCopy)
-                                                                toast.success('Güzergah ve numara kopyalandı')
+                                                                toast.success('Kopyalandı!')
                                                             }}
                                                             className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0"
                                                             title="Kopyala"

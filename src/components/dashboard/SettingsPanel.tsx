@@ -39,6 +39,7 @@ export default function SettingsPanel() {
     })
 
     const [devices, setDevices] = useState<Device[]>([])
+    const [companyName, setCompanyName] = useState('')
 
     useEffect(() => {
         loadSettings()
@@ -48,6 +49,17 @@ export default function SettingsPanel() {
         try {
             const { data: { session } } = await supabase.auth.getSession()
             if (!session) return
+
+            // Load company name from users table
+            const { data: userData } = await supabase
+                .from('users')
+                .select('company_name')
+                .eq('id', session.user.id)
+                .single()
+
+            if (userData?.company_name) {
+                setCompanyName(userData.company_name)
+            }
 
             // Load preferences
             const { data: prefData } = await supabase
@@ -84,6 +96,15 @@ export default function SettingsPanel() {
             const { data: { session } } = await supabase.auth.getSession()
             if (!session) return
 
+            // Save company name to users table
+            const { error: userError } = await supabase
+                .from('users')
+                .update({ company_name: companyName })
+                .eq('id', session.user.id)
+
+            if (userError) throw userError
+
+            // Save preferences
             const { error } = await supabase
                 .from('user_preferences')
                 .upsert({
@@ -142,10 +163,56 @@ export default function SettingsPanel() {
 
     return (
         <div className="space-y-6">
+            {/* Company Name */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl shadow-lg p-8"
+            >
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    Şirket Bilgileri
+                </h2>
+
+                <div className="space-y-4">
+                    <div className="p-4 bg-gray-50 rounded-xl">
+                        <h3 className="font-semibold text-gray-900 mb-2">Şirket Adı / Başlık</h3>
+                        <p className="text-sm text-gray-600 mb-3">Güzergah kopyalarken en alta eklenecek şirket adınız</p>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                value={companyName}
+                                onChange={(e) => setCompanyName(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleSavePreferences()
+                                    }
+                                }}
+                                placeholder="Örn: HOLLYWOOD TRANSFER"
+                                className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 font-medium"
+                            />
+                            <button
+                                onClick={handleSavePreferences}
+                                disabled={saving}
+                                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                            >
+                                {saving ? '...' : 'Kaydet'}
+                            </button>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                            💡 Kopyalama formatı: Güzergah + Numara + Şirket Adı
+                        </p>
+                    </div>
+                </div>
+            </motion.div>
+
             {/* Notification Preferences */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
                 className="bg-white rounded-2xl shadow-lg p-8"
             >
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
