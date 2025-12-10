@@ -379,33 +379,42 @@ export default function CallHistoryTable() {
 
                                             {/* Actions */}
                                             <td className="px-6 py-4">
-                                                {!call.contact_name && call.last_destination && (
-                                                    <button
-                                                        onClick={() => {
-                                                            // Save to contacts with last destination
-                                                            const contactData = {
-                                                                phone_number: call.phone_number,
-                                                                name: call.last_destination,
-                                                                notes: `Eklendi: ${new Date().toLocaleDateString('tr-TR')}`
-                                                            }
+                                                <div className="flex flex-col gap-2">
+                                                    {/* Appointment Button - Always show */}
+                                                    <AppointmentButton
+                                                        phoneNumber={call.phone_number}
+                                                        contactName={call.contact_name}
+                                                    />
 
-                                                            supabase
-                                                                .from('contacts')
-                                                                .insert(contactData)
-                                                                .then(({ error }) => {
-                                                                    if (error) {
-                                                                        toast.error('Rehbere eklenemedi')
-                                                                    } else {
-                                                                        toast.success('Rehbere eklendi!')
-                                                                        loadCalls()
-                                                                    }
-                                                                })
-                                                        }}
-                                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                                                    >
-                                                        Rehbere Kaydet
-                                                    </button>
-                                                )}
+                                                    {/* Save to Contacts Button - Only if not saved and has destination */}
+                                                    {!call.contact_name && call.last_destination && (
+                                                        <button
+                                                            onClick={() => {
+                                                                // Save to contacts with last destination
+                                                                const contactData = {
+                                                                    phone_number: call.phone_number,
+                                                                    name: call.last_destination,
+                                                                    notes: `Eklendi: ${new Date().toLocaleDateString('tr-TR')}`
+                                                                }
+
+                                                                supabase
+                                                                    .from('contacts')
+                                                                    .insert(contactData)
+                                                                    .then(({ error }) => {
+                                                                        if (error) {
+                                                                            toast.error('Rehbere eklenemedi')
+                                                                        } else {
+                                                                            toast.success('Rehbere eklendi!')
+                                                                            loadCalls()
+                                                                        }
+                                                                    })
+                                                            }}
+                                                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                                        >
+                                                            📇 Rehbere Kaydet
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </td>
                                         </motion.tr>
                                     ))
