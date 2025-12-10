@@ -269,8 +269,12 @@ export default function LandingPage() {
                         <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 blur-3xl opacity-20 rounded-3xl"></div>
                             <div className="relative bg-white/50 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-200">
-                                <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center">
-                                    <Smartphone className="w-32 h-32 text-blue-600/30" />
+                                <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl overflow-hidden">
+                                    <img
+                                        src="/dashboard-screenshot.png"
+                                        alt="Çağrı Yönetim Sistemi Dashboard"
+                                        className="w-full h-full object-cover object-top"
+                                    />
                                 </div>
                             </div>
                         </div>
