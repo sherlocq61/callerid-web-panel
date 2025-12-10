@@ -268,12 +268,13 @@ export default function LandingPage() {
                     >
                         <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 blur-3xl opacity-20 rounded-3xl"></div>
-                            <div className="relative bg-white/50 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-200">
-                                <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl overflow-hidden">
+                            <div className="relative bg-white/50 backdrop-blur-sm rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
+                                <div className="bg-gradient-to-br from-blue-100 to-purple-100" style={{ aspectRatio: '16/14' }}>
                                     <img
                                         src="/dashboard-screenshot.png"
                                         alt="Çağrı Yönetim Sistemi Dashboard"
-                                        className="w-full h-full object-cover object-top"
+                                        className="w-full h-full object-cover"
+                                        style={{ objectPosition: 'center 5%' }}
                                     />
                                 </div>
                             </div>
