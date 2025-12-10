@@ -519,7 +519,7 @@ export default function CallHistoryTable() {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
                         <h3 className="text-xl font-bold text-gray-900 mb-4">Rehbere Kaydet</h3>
-                        <form onSubmit={(e) => {
+                        <form onSubmit={async (e) => {
                             e.preventDefault()
                             const formData = new FormData(e.currentTarget)
                             const name = formData.get('name') as string
@@ -530,15 +530,24 @@ export default function CallHistoryTable() {
                                 return
                             }
 
+                            // Get current user
+                            const { data: { session } } = await supabase.auth.getSession()
+                            if (!session) {
+                                toast.error('Oturum bulunamadı')
+                                return
+                            }
+
                             supabase
                                 .from('contacts')
                                 .insert({
+                                    user_id: session.user.id,
                                     phone_number: saveContactModal.phoneNumber,
                                     name: name.trim(),
                                     notes: notes.trim() || null
                                 })
                                 .then(({ error }) => {
                                     if (error) {
+                                        console.error('Contact save error:', error)
                                         toast.error('Rehbere eklenemedi')
                                     } else {
                                         toast.success('Rehbere eklendi!')
