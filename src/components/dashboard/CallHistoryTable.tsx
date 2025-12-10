@@ -125,16 +125,12 @@ export default function CallHistoryTable() {
 
     const loadCalls = async () => {
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) return
-
             const { data: callsData, error: callsError } = await supabase
                 .from('calls')
                 .select(`
                     *,
                     contact:contacts!left(name)
                 `)
-                .eq('user_id', session.user.id)
                 .order('timestamp', { ascending: false })
                 .limit(50)
 
