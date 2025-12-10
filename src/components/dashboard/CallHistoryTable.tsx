@@ -17,6 +17,7 @@ interface CallDetail {
     timestamp: string
     is_blacklisted: boolean
     blacklist_reason?: string | null
+    last_destination?: string | null
 }
 
 export default function CallHistoryTable() {
@@ -165,10 +166,12 @@ export default function CallHistoryTable() {
     }
 
     const formatTime = (dateString: string) => {
+        // Parse UTC time and convert to Istanbul timezone (GMT+3)
         const date = new Date(dateString)
         return date.toLocaleTimeString('tr-TR', {
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            timeZone: 'Europe/Istanbul'
         })
     }
 
@@ -246,6 +249,9 @@ export default function CallHistoryTable() {
                                     </th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
                                         Süre
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                                        Son Güzergah
                                     </th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
                                         Durum
@@ -327,6 +333,33 @@ export default function CallHistoryTable() {
                                                 </span>
                                             </td>
 
+                                            {/* Last Destination */}
+                                            <td className="px-6 py-4">
+                                                {call.last_destination ? (
+                                                    <span className="text-sm text-gray-700">{call.last_destination}</span>
+                                                ) : (
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Güzergah girin..."
+                                                        className="text-sm px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        onBlur={(e) => {
+                                                            const destination = e.target.value.trim()
+                                                            if (destination) {
+                                                                // Save destination to database
+                                                                supabase
+                                                                    .from('calls')
+                                                                    .update({ last_destination: destination })
+                                                                    .eq('id', call.id)
+                                                                    .then(() => {
+                                                                        loadCalls()
+                                                                        toast.success('Güzergah kaydedildi')
+                                                                    })
+                                                            }
+                                                        }}
+                                                    />
+                                                )}
+                                            </td>
+
                                             {/* Status */}
                                             <td className="px-6 py-4">
                                                 {call.is_blacklisted && (
@@ -346,10 +379,33 @@ export default function CallHistoryTable() {
 
                                             {/* Actions */}
                                             <td className="px-6 py-4">
-                                                <AppointmentButton
-                                                    phoneNumber={call.phone_number}
-                                                    contactName={call.contact_name}
-                                                />
+                                                {!call.contact_name && call.last_destination && (
+                                                    <button
+                                                        onClick={() => {
+                                                            // Save to contacts with last destination
+                                                            const contactData = {
+                                                                phone_number: call.phone_number,
+                                                                name: call.last_destination,
+                                                                notes: `Eklendi: ${new Date().toLocaleDateString('tr-TR')}`
+                                                            }
+
+                                                            supabase
+                                                                .from('contacts')
+                                                                .insert(contactData)
+                                                                .then(({ error }) => {
+                                                                    if (error) {
+                                                                        toast.error('Rehbere eklenemedi')
+                                                                    } else {
+                                                                        toast.success('Rehbere eklendi!')
+                                                                        loadCalls()
+                                                                    }
+                                                                })
+                                                        }}
+                                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                                                    >
+                                                        Rehbere Kaydet
+                                                    </button>
+                                                )}
                                             </td>
                                         </motion.tr>
                                     ))
