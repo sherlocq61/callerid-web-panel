@@ -7,6 +7,8 @@ import AdminLayout from '@/components/admin/AdminLayout'
 import { Save, DollarSign, Building2, Globe, Mail } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useNotification } from '@/components/notifications/NotificationProvider'
+import MarketplaceSettingsModal from '@/components/admin/MarketplaceSettingsModal'
+import { ShoppingCart } from 'lucide-react'
 
 interface PricingPlan {
     monthly: number
@@ -38,6 +40,7 @@ export default function AdminSettingsPage() {
     const { showToast } = useNotification()
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
+    const [showMarketplaceModal, setShowMarketplaceModal] = useState(false)
     const [settings, setSettings] = useState<Settings>({
         paytr_merchant_id: '',
         paytr_merchant_key: '',

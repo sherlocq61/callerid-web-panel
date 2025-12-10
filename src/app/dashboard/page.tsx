@@ -19,6 +19,8 @@ import SubscriptionPanel from '@/components/dashboard/SubscriptionPanel'
 import AppointmentsPanel from '@/components/appointments/AppointmentsPanel'
 import TeamManagementPanel from '@/components/team/TeamManagementPanel'
 import ActivityLogsPanel from '@/components/team/ActivityLogsPanel'
+import JobMarketplace from '@/components/jobs/JobMarketplace'
+import BalancePanel from '@/components/balance/BalancePanel'
 import { AlertTriangle, Calendar, Crown, User } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -30,12 +32,13 @@ interface Subscription {
 
 export default function DashboardPage() {
     const searchParams = useSearchParams()
-    const tabParam = searchParams.get('tab') as 'calls' | 'blacklist' | 'contacts' | 'appointments' | 'team' | 'activity' | 'subscription' | 'profile' | 'settings' | null
+    const tabParam = searchParams.get('tab') as 'calls' | 'blacklist' | 'contacts' | 'appointments' | 'marketplace' | 'balance' | 'team' | 'activity' | 'subscription' | 'profile' | 'settings' | null
 
     const [loading, setLoading] = useState(true)
-    const [activeTab, setActiveTab] = useState<'calls' | 'blacklist' | 'contacts' | 'appointments' | 'team' | 'activity' | 'subscription' | 'profile' | 'settings'>(tabParam || 'calls')
+    const [activeTab, setActiveTab] = useState<'calls' | 'blacklist' | 'contacts' | 'appointments' | 'marketplace' | 'balance' | 'team' | 'activity' | 'subscription' | 'profile' | 'settings'>(tabParam || 'calls')
     const [subscription, setSubscription] = useState<Subscription | null>(null)
     const [daysRemaining, setDaysRemaining] = useState<number | null>(null)
+    const [marketplaceEnabled, setMarketplaceEnabled] = useState(true)
     const router = useRouter()
     const supabase = createBrowserClient()
     const { hasPermission, isSubAccount, loading: permLoading } = usePermissions()
@@ -48,7 +51,10 @@ export default function DashboardPage() {
 
     useEffect(() => {
         checkAuthAndSubscription()
+        loadMarketplaceSettings()
+    }, [])
 
+    useEffect(() => {
         // Update days remaining every hour
         const interval = setInterval(() => {
             if (subscription?.expires_at) {
@@ -107,6 +113,23 @@ export default function DashboardPage() {
     const handleSignOut = async () => {
         await supabase.auth.signOut()
         router.push('/')
+    }
+
+    const loadMarketplaceSettings = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('marketplace_settings')
+                .select('value')
+                .eq('key', 'marketplace_config')
+                .single()
+
+            if (data && !error) {
+                const settings = data.value as any
+                setMarketplaceEnabled(settings.enabled || false)
+            }
+        } catch (error) {
+            console.error('Error loading marketplace settings:', error)
+        }
     }
 
     const getPlanColor = (plan: string) => {
@@ -228,11 +251,21 @@ export default function DashboardPage() {
                     )}
                     {!isSubAccount && (
                         <>
+                            {marketplaceEnabled && (subscription?.plan === 'pro' || subscription?.plan === 'enterprise') && (
+                                <>
+                                    <button onClick={() => updateTab('marketplace')} className={`px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === 'marketplace' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
+                                        İş Havuzu
+                                    </button>
+                                    <button onClick={() => updateTab('balance')} className={`px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === 'balance' ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
+                                        Bakiye
+                                    </button>
+                                </>
+                            )}
                             <button onClick={() => updateTab('team')} className={`px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === 'team' ? 'bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
-                                Ekip
+                                Ekip Yönetimi
                             </button>
                             <button onClick={() => updateTab('activity')} className={`px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === 'activity' ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
-                                Aktivite
+                                Aktivite Logları
                             </button>
                             <button onClick={() => updateTab('subscription')} className={`px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === 'subscription' ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50'}`}>
                                 Abonelik
@@ -266,6 +299,8 @@ export default function DashboardPage() {
                     {activeTab === 'blacklist' && <BlacklistPanel />}
                     {activeTab === 'contacts' && <ContactsPanel />}
                     {activeTab === 'appointments' && <AppointmentsPanel />}
+                    {activeTab === 'marketplace' && <JobMarketplace />}
+                    {activeTab === 'balance' && <BalancePanel />}
                     {activeTab === 'team' && <TeamManagementPanel />}
                     {activeTab === 'activity' && <ActivityLogsPanel />}
                     {activeTab === 'subscription' && <SubscriptionPanel />}
