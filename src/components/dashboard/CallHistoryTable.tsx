@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@/lib/supabase/client'
-import { Phone, Clock, User, Ban, PhoneIncoming, PhoneOutgoing, PhoneMissed, Calendar } from 'lucide-react'
+import { Phone, Clock, User, Ban, PhoneIncoming, PhoneOutgoing, PhoneMissed, Calendar, UserPlus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import toast, { Toaster } from 'react-hot-toast'
 import AppointmentModal from '../appointments/AppointmentModal'
@@ -28,6 +28,11 @@ export default function CallHistoryTable() {
         phoneNumber: string
         contactName: string | null
     }>({ isOpen: false, phoneNumber: '', contactName: null })
+    const [saveContactModal, setSaveContactModal] = useState<{
+        isOpen: boolean
+        phoneNumber: string
+        defaultName: string
+    }>({ isOpen: false, phoneNumber: '', defaultName: '' })
     const supabase = createBrowserClient()
 
     useEffect(() => {
@@ -320,9 +325,22 @@ export default function CallHistoryTable() {
                                                             </span>
                                                         </>
                                                     ) : (
-                                                        <span className="font-mono font-semibold text-gray-900">
-                                                            {formatPhoneNumber(call.phone_number)}
-                                                        </span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-mono font-semibold text-gray-900">
+                                                                {formatPhoneNumber(call.phone_number)}
+                                                            </span>
+                                                            <button
+                                                                onClick={() => setSaveContactModal({
+                                                                    isOpen: true,
+                                                                    phoneNumber: call.phone_number,
+                                                                    defaultName: call.last_destination || ''
+                                                                })}
+                                                                className="p-1 hover:bg-blue-50 rounded-full transition-colors"
+                                                                title="Rehbere Kaydet"
+                                                            >
+                                                                <UserPlus className="w-4 h-4 text-blue-600" />
+                                                            </button>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </td>
@@ -497,6 +515,96 @@ export default function CallHistoryTable() {
                     loadCalls()
                 }}
             />
+
+            {/* Save Contact Modal */}
+            {saveContactModal.isOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">Rehbere Kaydet</h3>
+                        <form onSubmit={(e) => {
+                            e.preventDefault()
+                            const formData = new FormData(e.currentTarget)
+                            const name = formData.get('name') as string
+                            const notes = formData.get('notes') as string
+
+                            if (!name.trim()) {
+                                toast.error('İsim gerekli')
+                                return
+                            }
+
+                            supabase
+                                .from('contacts')
+                                .insert({
+                                    phone_number: saveContactModal.phoneNumber,
+                                    name: name.trim(),
+                                    notes: notes.trim() || null
+                                })
+                                .then(({ error }) => {
+                                    if (error) {
+                                        toast.error('Rehbere eklenemedi')
+                                    } else {
+                                        toast.success('Rehbere eklendi!')
+                                        setSaveContactModal({ isOpen: false, phoneNumber: '', defaultName: '' })
+                                        loadCalls()
+                                    }
+                                })
+                        }}>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Telefon Numarası
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={saveContactModal.phoneNumber}
+                                        disabled
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        İsim *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        defaultValue={saveContactModal.defaultName}
+                                        placeholder="Kişi adı"
+                                        required
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Notlar
+                                    </label>
+                                    <textarea
+                                        name="notes"
+                                        placeholder="Ek bilgiler (opsiyonel)"
+                                        rows={3}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setSaveContactModal({ isOpen: false, phoneNumber: '', defaultName: '' })}
+                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    İptal
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                    Kaydet
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </>
     )
 }
