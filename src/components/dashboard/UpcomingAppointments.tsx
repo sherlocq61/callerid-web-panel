@@ -34,15 +34,7 @@ export default function UpcomingAppointments() {
 
             const { data, error } = await supabase
                 .from('appointments')
-                .select(`
-                    id,
-                    phone_number,
-                    appointment_date,
-                    notes,
-                    contacts:phone_number (
-                        name
-                    )
-                `)
+                .select('id, phone_number, appointment_date, notes')
                 .eq('user_id', user.id)
                 .eq('status', 'scheduled')
                 .gte('appointment_date', nowISO)
@@ -51,9 +43,20 @@ export default function UpcomingAppointments() {
 
             if (error) throw error
 
+            // Get contacts separately
+            const { data: contactsData } = await supabase
+                .from('contacts')
+                .select('phone_number, name')
+                .eq('user_id', user.id)
+
+            // Create contact map
+            const contactMap = new Map(
+                contactsData?.map(c => [c.phone_number, c.name]) || []
+            )
+
             const enriched = data?.map(apt => ({
                 ...apt,
-                contact_name: (apt.contacts as any)?.name
+                contact_name: contactMap.get(apt.phone_number)
             })) || []
 
             setAppointments(enriched)
