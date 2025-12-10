@@ -186,12 +186,11 @@ export default function CallHistoryTable() {
     }
 
     const formatTime = (dateString: string) => {
-        // Parse timestamp and display in Istanbul timezone
+        // Android sends timestamp in local time, just format it
         const date = new Date(dateString)
-        return date.toLocaleString('tr-TR', {
+        return date.toLocaleTimeString('tr-TR', {
             hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'Europe/Istanbul'
+            minute: '2-digit'
         })
     }
 
