@@ -439,8 +439,9 @@ export default function CallHistoryTable() {
                                                     {call.last_destination && (
                                                         <button
                                                             onClick={() => {
-                                                                navigator.clipboard.writeText(call.last_destination || '')
-                                                                toast.success('Güzergah kopyalandı')
+                                                                const textToCopy = `${call.last_destination}\n${formatPhoneNumber(call.phone_number)}`
+                                                                navigator.clipboard.writeText(textToCopy)
+                                                                toast.success('Güzergah ve numara kopyalandı')
                                                             }}
                                                             className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0"
                                                             title="Kopyala"
