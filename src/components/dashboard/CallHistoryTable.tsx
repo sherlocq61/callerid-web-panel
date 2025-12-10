@@ -131,11 +131,26 @@ export default function CallHistoryTable() {
                 blacklistData?.map(b => [b.phone_number, b.reason]) || []
             )
 
-            const enrichedCalls: CallDetail[] = (callsData || []).map(call => ({
-                ...call,
-                is_blacklisted: blacklistMap.has(call.phone_number),
-                blacklist_reason: blacklistMap.get(call.phone_number)
-            }))
+            // Auto-populate last_destination from previous calls
+            const enrichedCalls: CallDetail[] = (callsData || []).map(call => {
+                // If no destination, try to get from previous call with same number
+                let lastDestination = call.last_destination
+                if (!lastDestination) {
+                    const previousCall = callsData?.find(
+                        c => c.phone_number === call.phone_number &&
+                            c.id !== call.id &&
+                            c.last_destination
+                    )
+                    lastDestination = previousCall?.last_destination || null
+                }
+
+                return {
+                    ...call,
+                    last_destination: lastDestination,
+                    is_blacklisted: blacklistMap.has(call.phone_number),
+                    blacklist_reason: blacklistMap.get(call.phone_number)
+                }
+            })
 
             setCalls(enrichedCalls)
         } catch (err) {
