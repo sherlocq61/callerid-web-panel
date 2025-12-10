@@ -389,9 +389,14 @@ export default function CallHistoryTable() {
                                                                     .from('calls')
                                                                     .update({ last_destination: destination })
                                                                     .eq('id', call.id)
-                                                                    .then(() => {
-                                                                        toast.success('Güzergah kaydedildi')
-                                                                        loadCalls()
+                                                                    .then(({ error }) => {
+                                                                        if (error) {
+                                                                            console.error('Destination save error:', error)
+                                                                            toast.error('Güzergah kaydedilemedi: ' + error.message)
+                                                                        } else {
+                                                                            toast.success('Güzergah kaydedildi')
+                                                                            loadCalls()
+                                                                        }
                                                                     })
                                                             }
                                                         }
@@ -404,9 +409,14 @@ export default function CallHistoryTable() {
                                                                 .from('calls')
                                                                 .update({ last_destination: destination })
                                                                 .eq('id', call.id)
-                                                                .then(() => {
-                                                                    loadCalls()
-                                                                    toast.success('Güzergah kaydedildi')
+                                                                .then(({ error }) => {
+                                                                    if (error) {
+                                                                        console.error('Destination save error:', error)
+                                                                        toast.error('Güzergah kaydedilemedi: ' + error.message)
+                                                                    } else {
+                                                                        toast.success('Güzergah kaydedildi')
+                                                                        loadCalls()
+                                                                    }
                                                                 })
                                                         }
                                                     }}
