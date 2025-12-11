@@ -151,7 +151,7 @@ export default function CallHistoryTable() {
 
                     const notification = new Notification(title, {
                         body,
-                        tag: 'incoming-call', // Prevent duplicate notifications
+                        tag: `call-${Date.now()}`, // Unique tag to prevent Windows suppression
                         requireInteraction: true, // Keep notification visible
                         silent: false
                     })
