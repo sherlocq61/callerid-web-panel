@@ -184,9 +184,12 @@ export default function CallHistoryTable() {
                     lastDestination = previousCall?.last_destination || null
                 }
 
+                // Use contact_name from call if available, otherwise lookup from contacts table
+                const contactName = call.contact_name || contactMap.get(call.phone_number) || null
+
                 return {
                     ...call,
-                    contact_name: contactMap.get(call.phone_number) || null,
+                    contact_name: contactName,
                     last_destination: lastDestination,
                     is_blacklisted: blacklistMap.has(call.phone_number),
                     blacklist_reason: blacklistMap.get(call.phone_number)
