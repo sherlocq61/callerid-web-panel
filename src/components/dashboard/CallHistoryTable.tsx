@@ -53,11 +53,13 @@ export default function CallHistoryTable() {
                 { event: 'INSERT', schema: 'public', table: 'calls' },
                 (payload) => {
                     console.log('New call received:', payload)
-                    loadCalls()
+
+                    // Add new call to the list
+                    const newCall = payload.new as any
+                    setCalls((prevCalls) => [newCall, ...prevCalls])
 
                     // Show browser notification
-                    const call = payload.new as any
-                    showCallNotification(call)
+                    showCallNotification(newCall)
                 }
             )
             .subscribe()
@@ -75,7 +77,7 @@ export default function CallHistoryTable() {
                 .select('reason')
                 .eq('phone_number', call.phone_number)
                 .eq('is_active', true)
-                .single()
+                .maybeSingle()
 
             const displayName = call.contact_name || call.phone_number
 
@@ -220,13 +222,13 @@ export default function CallHistoryTable() {
     }
 
     const formatTime = (dateString: string) => {
-        // Android sends UTC, convert to Istanbul time
-        const date = new Date(dateString)
-        return date.toLocaleTimeString('tr-TR', {
+        // Android now sends UTC, automatically convert to Istanbul time
+        return new Intl.DateTimeFormat('tr-TR', {
             hour: '2-digit',
             minute: '2-digit',
-            timeZone: 'Europe/Istanbul'
-        })
+            timeZone: 'Europe/Istanbul',
+            hour12: false
+        }).format(new Date(dateString))
     }
 
     const formatDuration = (seconds: number) => {
