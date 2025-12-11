@@ -151,10 +151,14 @@ export default function CallHistoryTable() {
 
             if (callsError) throw callsError
 
-            // Then get contacts to match
+            // Get unique phone numbers from calls
+            const phoneNumbers = [...new Set(callsData?.map(c => c.phone_number) || [])]
+
+            // Only fetch contacts for numbers in call history (optimization for large contact lists)
             const { data: contactsData } = await supabase
                 .from('contacts')
                 .select('phone_number, name')
+                .in('phone_number', phoneNumbers)
 
             // Create contact map
             const contactMap = new Map(
