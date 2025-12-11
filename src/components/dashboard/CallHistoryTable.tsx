@@ -117,20 +117,70 @@ export default function CallHistoryTable() {
                 )
             }
 
-            // Request browser notification permission and show
-            if ('Notification' in window && Notification.permission === 'granted') {
-                const title = blacklistEntry
-                    ? `⚠️ KARA LİSTE - Gelen Çağrı`
-                    : 'Gelen Çağrı'
-                const body = blacklistEntry
-                    ? `${displayName}\nSebep: ${blacklistEntry.reason || 'Belirtilmemiş'}`
-                    : `${displayName} numarasından çağrı geldi`
+            // Browser notification with comprehensive error handling
+            try {
+                // Check if Notification API is available
+                if (!('Notification' in window)) {
+                    console.warn('Browser notifications not supported')
+                    return
+                }
 
-                new Notification(title, {
-                    body,
-                    icon: '/icon.png',
-                    badge: '/badge.png'
-                })
+                // Check current permission
+                console.log('Notification permission:', Notification.permission)
+
+                // Request permission if not granted
+                if (Notification.permission === 'default') {
+                    const permission = await Notification.requestPermission()
+                    console.log('Permission request result:', permission)
+                    if (permission !== 'granted') {
+                        console.warn('Notification permission denied')
+                        return
+                    }
+                }
+
+                // Only show if permission is granted
+                if (Notification.permission === 'granted') {
+                    const title = blacklistEntry
+                        ? `⚠️ KARA LİSTE - Gelen Çağrı`
+                        : 'Gelen Çağrı'
+                    const body = blacklistEntry
+                        ? `${displayName}\nSebep: ${blacklistEntry.reason || 'Belirtilmemiş'}`
+                        : `${displayName} numarasından çağrı geldi`
+
+                    console.log('Showing notification:', title, body)
+
+                    const notification = new Notification(title, {
+                        body,
+                        icon: '/icon.png',
+                        badge: '/badge.png',
+                        tag: 'incoming-call', // Prevent duplicate notifications
+                        requireInteraction: true, // Keep notification visible
+                        silent: false
+                    })
+
+                    // Log notification events
+                    notification.onclick = () => {
+                        console.log('Notification clicked')
+                        window.focus()
+                        notification.close()
+                    }
+
+                    notification.onerror = (error) => {
+                        console.error('Notification error:', error)
+                    }
+
+                    notification.onshow = () => {
+                        console.log('Notification shown successfully')
+                    }
+
+                    notification.onclose = () => {
+                        console.log('Notification closed')
+                    }
+                } else {
+                    console.warn('Notification permission not granted:', Notification.permission)
+                }
+            } catch (error) {
+                console.error('Error showing browser notification:', error)
             }
         } catch (error) {
             console.error('Error showing notification:', error)
