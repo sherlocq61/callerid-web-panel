@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Initialize Supabase client with runtime check to prevent build errors
+const getSupabaseClient = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+        console.error('Missing Supabase environment variables')
+        return null
+    }
+
+    return createClient(supabaseUrl, supabaseKey)
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -41,6 +49,13 @@ export async function POST(request: NextRequest) {
                 total_amount,
                 status
             })
+
+            // Get Supabase client
+            const supabase = getSupabaseClient()
+            if (!supabase) {
+                console.error('Supabase client initialization failed')
+                return new NextResponse('OK', { status: 200 })
+            }
 
             // merchant_oid'den user_id ve plan bilgisini çıkar
             // Format: userId-plan-timestamp
