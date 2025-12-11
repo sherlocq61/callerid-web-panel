@@ -71,16 +71,23 @@ export default function StatsCards() {
 
             // Get total calls count
             const { count: callsCount } = await supabase
-                .from('call_logs')
+                .from('calls')
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', session.user.id)
 
-            // Get blocked calls count
+            // Get blocked calls count (calls from blacklisted numbers)
+            const { data: blacklistNumbers } = await supabase
+                .from('blacklist')
+                .select('phone_number')
+                .eq('is_active', true)
+
+            const blacklistedPhones = blacklistNumbers?.map(b => b.phone_number) || []
+
             const { count: blockedCount } = await supabase
-                .from('call_logs')
+                .from('calls')
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', session.user.id)
-                .eq('is_blocked', true)
+                .in('phone_number', blacklistedPhones.length > 0 ? blacklistedPhones : ['__none__'])
 
             // Get total contacts count
             const { count: contactsCount } = await supabase
