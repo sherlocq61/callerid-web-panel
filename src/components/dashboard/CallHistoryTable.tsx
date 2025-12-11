@@ -225,15 +225,13 @@ export default function CallHistoryTable() {
     }
 
     const formatTime = (dateString: string) => {
-        // Timestamp is Istanbul time but marked as +00:00 (UTC)
-        // Subtract 3 hours to get correct Istanbul time
-        const date = new Date(dateString)
-        const corrected = new Date(date.getTime() - (3 * 60 * 60 * 1000))
-        return new Intl.DateTimeFormat('tr-TR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        }).format(corrected)
+        // Android sends Istanbul time marked as UTC
+        // Just display it as-is without timezone conversion
+        const parts = dateString.split('T')[1]?.split(':')
+        if (parts && parts.length >= 2) {
+            return `${parts[0]}:${parts[1]}`
+        }
+        return dateString
     }
 
     const formatDuration = (seconds: number) => {
