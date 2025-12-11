@@ -46,7 +46,7 @@ export default function CallHistoryTable() {
 
         loadCalls()
 
-        // Real-time subscription
+        // Real-time subscription with status monitoring
         const channel = supabase
             .channel('calls-changes')
             .on('postgres_changes',
@@ -62,9 +62,20 @@ export default function CallHistoryTable() {
                     showCallNotification(newCall)
                 }
             )
-            .subscribe()
+            .subscribe((status) => {
+                console.log('Realtime subscription status:', status)
+                if (status === 'SUBSCRIBED') {
+                    console.log('✅ Successfully subscribed to call notifications')
+                } else if (status === 'CHANNEL_ERROR') {
+                    console.error('❌ Realtime subscription error - attempting reconnect...')
+                    // Supabase will automatically retry
+                } else if (status === 'TIMED_OUT') {
+                    console.error('⏱️ Realtime subscription timed out')
+                }
+            })
 
         return () => {
+            console.log('Unsubscribing from call notifications')
             supabase.removeChannel(channel)
         }
     }, [])

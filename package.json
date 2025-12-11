@@ -36,7 +36,11 @@
                     ]
                 }
             ],
-            "compression": "store"
+            "compression": "store",
+            "signingHashAlgorithms": [
+                "sha256"
+            ],
+            "sign": null
         }
     },
     "dependencies": {
