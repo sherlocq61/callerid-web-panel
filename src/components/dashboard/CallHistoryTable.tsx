@@ -225,11 +225,11 @@ export default function CallHistoryTable() {
     }
 
     const formatTime = (dateString: string) => {
-        // Android sends Istanbul time marked as UTC
-        // Just display it as-is without timezone conversion
-        const parts = dateString.split('T')[1]?.split(':')
-        if (parts && parts.length >= 2) {
-            return `${parts[0]}:${parts[1]}`
+        // Android sends Istanbul time but marks it as UTC (+00:00)
+        // Extract time directly without timezone conversion
+        const timePart = dateString.split('T')[1]
+        if (timePart) {
+            return timePart.substring(0, 5) // Get HH:MM
         }
         return dateString
     }
