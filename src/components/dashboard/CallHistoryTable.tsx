@@ -151,8 +151,6 @@ export default function CallHistoryTable() {
 
                     const notification = new Notification(title, {
                         body,
-                        icon: '/icon.png',
-                        badge: '/badge.png',
                         tag: 'incoming-call', // Prevent duplicate notifications
                         requireInteraction: true, // Keep notification visible
                         silent: false
