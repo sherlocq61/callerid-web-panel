@@ -288,13 +288,14 @@ export default function CallHistoryTable() {
     }
 
     const formatTime = (dateString: string) => {
-        // Android sends Istanbul time but marks it as UTC (+00:00)
-        // Extract time directly without timezone conversion
-        const timePart = dateString.split('T')[1]
-        if (timePart) {
-            return timePart.substring(0, 5) // Get HH:MM
-        }
-        return dateString
+        // Supabase stores in Istanbul time but sends as UTC
+        // Convert to Istanbul timezone for display
+        const date = new Date(dateString)
+        return new Intl.DateTimeFormat('tr-TR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'Europe/Istanbul'
+        }).format(date)
     }
 
     const formatDuration = (seconds: number) => {
