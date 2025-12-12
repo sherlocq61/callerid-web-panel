@@ -55,15 +55,31 @@ export default function CallHistoryTable({ selectedDate }: CallHistoryTableProps
             .channel('calls-changes')
             .on('postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'calls' },
-                (payload) => {
+                async (payload) => {
                     console.log('New call received:', payload)
 
-                    // Add new call to the list
+                    // Add new call to the list with blacklist check
                     const newCall = payload.new as any
-                    setCalls((prevCalls) => [newCall, ...prevCalls])
+
+                    // Check if number is blacklisted
+                    const { data: blacklistEntry } = await supabase
+                        .from('blacklist')
+                        .select('*')
+                        .eq('phone_number', newCall.phone_number)
+                        .eq('is_active', true)
+                        .single()
+
+                    // Add blacklist info to call
+                    const enrichedCall = {
+                        ...newCall,
+                        is_blacklisted: !!blacklistEntry,
+                        blacklist_reason: blacklistEntry?.reason || null
+                    }
+
+                    setCalls((prevCalls) => [enrichedCall, ...prevCalls])
 
                     // Show browser notification
-                    showCallNotification(newCall)
+                    showCallNotification(enrichedCall)
                 }
             )
             .subscribe((status) => {
@@ -82,9 +98,12 @@ export default function CallHistoryTable({ selectedDate }: CallHistoryTableProps
             .channel('blacklist-changes')
             .on('postgres_changes',
                 { event: '*', schema: 'public', table: 'blacklist' },
-                () => {
+                async () => {
                     console.log('Blacklist changed, reloading calls...')
-                    loadCalls() // Reload to update is_blacklisted status
+                    // Force reload by calling loadCalls
+                    setLoading(true)
+                    await loadCalls()
+                    setLoading(false)
                 }
             )
             .subscribe()
