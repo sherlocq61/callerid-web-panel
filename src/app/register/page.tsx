@@ -25,6 +25,8 @@ export default function RegisterPage() {
         setError(null)
 
         try {
+            console.log('Starting signup with:', formData.email)
+
             const { data, error } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
@@ -35,17 +37,25 @@ export default function RegisterPage() {
                 },
             })
 
-            if (error) throw error
+            console.log('Signup response:', { data, error })
+
+            if (error) {
+                console.error('Signup error:', error)
+                throw error
+            }
 
             // Check if email confirmation is required
             if (data.user && !data.session) {
                 // Email confirmation required
+                console.log('Email confirmation required')
                 setSuccess(true)
             } else {
                 // User is already logged in
+                console.log('User logged in, redirecting')
                 router.push('/dashboard')
             }
         } catch (err: any) {
+            console.error('Caught error:', err)
             setError(err.message || 'Kayıt başarısız')
         } finally {
             setLoading(false)

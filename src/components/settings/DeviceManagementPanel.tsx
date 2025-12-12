@@ -86,19 +86,22 @@ export default function DeviceManagementPanel() {
 
                 const { data } = await supabase
                     .from('devices')
-                    .select(`
-                        *,
-                        users:user_id (
-                            full_name
-                        )
-                    `)
+                    .select('*')
                     .in('user_id', userIds)
                     .order('last_seen', { ascending: false })
+
+                // Get user names separately
+                const { data: usersData } = await supabase
+                    .from('users')
+                    .select('id, full_name')
+                    .in('id', userIds)
+
+                const userMap = new Map(usersData?.map(u => [u.id, u.full_name]) || [])
 
                 const enrichedDevices = data?.map(d => ({
                     ...d,
                     assigned_to: d.user_id,
-                    assigned_user_name: (d.users as any)?.full_name
+                    assigned_user_name: userMap.get(d.user_id) || 'Unknown'
                 })) || []
 
                 setDevices(enrichedDevices)

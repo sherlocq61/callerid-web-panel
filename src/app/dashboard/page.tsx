@@ -39,6 +39,7 @@ export default function DashboardPage() {
     const [subscription, setSubscription] = useState<Subscription | null>(null)
     const [daysRemaining, setDaysRemaining] = useState<number | null>(null)
     const [marketplaceEnabled, setMarketplaceEnabled] = useState(true)
+    const [selectedDate, setSelectedDate] = useState<string | null>(null) // null = today
     const router = useRouter()
     const supabase = createBrowserClient()
     const { hasPermission, isSubAccount, loading: permLoading } = usePermissions()
@@ -287,7 +288,10 @@ export default function DashboardPage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
                 {activeTab === 'calls' && (
                     <>
-                        <StatsCards />
+                        <StatsCards
+                            selectedDate={selectedDate}
+                            onDateChange={setSelectedDate}
+                        />
                         <div className="mt-6">
                             <UpcomingAppointments />
                         </div>
@@ -295,7 +299,7 @@ export default function DashboardPage() {
                 )}
 
                 <div className="space-y-6">
-                    {activeTab === 'calls' && <CallHistoryTable />}
+                    {activeTab === 'calls' && <CallHistoryTable selectedDate={selectedDate} />}
                     {activeTab === 'blacklist' && <BlacklistPanel />}
                     {activeTab === 'contacts' && <ContactsPanel />}
                     {activeTab === 'appointments' && <AppointmentsPanel />}

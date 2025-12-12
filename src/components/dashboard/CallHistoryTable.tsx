@@ -20,7 +20,11 @@ interface CallDetail {
     last_destination?: string | null
 }
 
-export default function CallHistoryTable() {
+interface CallHistoryTableProps {
+    selectedDate: string | null
+}
+
+export default function CallHistoryTable({ selectedDate }: CallHistoryTableProps) {
     const [calls, setCalls] = useState<CallDetail[]>([])
     const [loading, setLoading] = useState(true)
     const [appointmentModal, setAppointmentModal] = useState<{
@@ -46,8 +50,8 @@ export default function CallHistoryTable() {
 
         loadCalls()
 
-        // Real-time subscription with status monitoring
-        const channel = supabase
+        // Real-time subscription for calls
+        const callsChannel = supabase
             .channel('calls-changes')
             .on('postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'calls' },
@@ -68,17 +72,29 @@ export default function CallHistoryTable() {
                     console.log('✅ Successfully subscribed to call notifications')
                 } else if (status === 'CHANNEL_ERROR') {
                     console.error('❌ Realtime subscription error - attempting reconnect...')
-                    // Supabase will automatically retry
                 } else if (status === 'TIMED_OUT') {
                     console.error('⏱️ Realtime subscription timed out')
                 }
             })
 
+        // Real-time subscription for blacklist changes
+        const blacklistChannel = supabase
+            .channel('blacklist-changes')
+            .on('postgres_changes',
+                { event: '*', schema: 'public', table: 'blacklist' },
+                () => {
+                    console.log('Blacklist changed, reloading calls...')
+                    loadCalls() // Reload to update is_blacklisted status
+                }
+            )
+            .subscribe()
+
         return () => {
-            console.log('Unsubscribing from call notifications')
-            supabase.removeChannel(channel)
+            console.log('Unsubscribing from notifications')
+            supabase.removeChannel(callsChannel)
+            supabase.removeChannel(blacklistChannel)
         }
-    }, [])
+    }, [selectedDate]) // Reload when date changes
 
     const showCallNotification = async (call: any) => {
         try {
@@ -201,12 +217,21 @@ export default function CallHistoryTable() {
                 }
             }
 
-            // First get calls
-            const { data: callsData, error: callsError } = await supabase
+            // Calculate date range for filtering
+            const targetDate = selectedDate || new Date().toISOString().split('T')[0] // Today if null
+            const startOfDay = `${targetDate}T00:00:00`
+            const endOfDay = `${targetDate}T23:59:59`
+
+            // First get calls filtered by date
+            let callsQuery = supabase
                 .from('calls')
                 .select('*')
+                .gte('timestamp', startOfDay)
+                .lte('timestamp', endOfDay)
                 .order('timestamp', { ascending: false })
                 .limit(50)
+
+            const { data: callsData, error: callsError } = await callsQuery
 
             if (callsError) throw callsError
 

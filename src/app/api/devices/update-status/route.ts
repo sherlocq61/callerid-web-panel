@@ -18,14 +18,15 @@ export async function POST() {
 
         const supabase = createClient(supabaseUrl, supabaseKey)
 
-        // Mark devices as offline if last_seen > 2 minutes
-        const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString()
+        // Mark devices as offline if last_seen > 10 minutes
+        // Android app updates every 5 minutes, so 10 minutes gives buffer
+        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
 
         const { error } = await supabase
             .from('devices')
             .update({ is_online: false })
             .eq('is_online', true)
-            .lt('last_seen', twoMinutesAgo)
+            .lt('last_seen', tenMinutesAgo)
 
         if (error) {
             console.error('Supabase error:', error)
