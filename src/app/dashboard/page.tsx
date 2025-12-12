@@ -23,6 +23,7 @@ import JobMarketplace from '@/components/jobs/JobMarketplace'
 import BalancePanel from '@/components/balance/BalancePanel'
 import { AlertTriangle, Calendar, Crown, User } from 'lucide-react'
 import { motion } from 'framer-motion'
+import AIAssistantToggle from '@/components/dashboard/AIAssistantToggle'
 
 interface Subscription {
     plan: 'lite' | 'pro' | 'enterprise'
@@ -288,6 +289,9 @@ export default function DashboardPage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
                 {activeTab === 'calls' && (
                     <>
+                        <div className="mb-6">
+                            <AIAssistantToggle />
+                        </div>
                         <StatsCards
                             selectedDate={selectedDate}
                             onDateChange={setSelectedDate}

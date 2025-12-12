@@ -18,6 +18,7 @@ interface CallDetail {
     is_blacklisted: boolean
     blacklist_reason?: string | null
     last_destination?: string | null
+    answered_by_ai?: boolean
 }
 
 interface CallHistoryTableProps {
@@ -465,6 +466,11 @@ export default function CallHistoryTable({ selectedDate }: CallHistoryTableProps
                                                                 <span className="font-semibold text-gray-900">
                                                                     {call.contact_name}
                                                                 </span>
+                                                                {call.answered_by_ai && (
+                                                                    <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-sm">
+                                                                        AI
+                                                                    </span>
+                                                                )}
                                                             </div>
                                                             <span className="text-sm text-gray-600 font-mono ml-6 whitespace-nowrap">
                                                                 {formatPhoneNumber(call.phone_number)}
@@ -475,6 +481,11 @@ export default function CallHistoryTable({ selectedDate }: CallHistoryTableProps
                                                             <span className="font-mono font-semibold text-gray-900 whitespace-nowrap">
                                                                 {formatPhoneNumber(call.phone_number)}
                                                             </span>
+                                                            {call.answered_by_ai && (
+                                                                <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-sm">
+                                                                    AI
+                                                                </span>
+                                                            )}
                                                             <button
                                                                 onClick={() => setSaveContactModal({
                                                                     isOpen: true,
