@@ -7,10 +7,16 @@ export const dynamic = 'force-dynamic'
 // Called periodically to mark offline devices
 export async function POST() {
     try {
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY! // Use service role for admin operations
-        )
+        // Use runtime client initialization to avoid build-time env var dependency
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+        if (!supabaseUrl || !supabaseKey) {
+            console.error('Missing Supabase credentials')
+            return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+        }
+
+        const supabase = createClient(supabaseUrl, supabaseKey)
 
         // Mark devices as offline if last_seen > 2 minutes
         const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString()
@@ -21,7 +27,10 @@ export async function POST() {
             .eq('is_online', true)
             .lt('last_seen', twoMinutesAgo)
 
-        if (error) throw error
+        if (error) {
+            console.error('Supabase error:', error)
+            throw error
+        }
 
         return NextResponse.json({ success: true })
     } catch (error) {
